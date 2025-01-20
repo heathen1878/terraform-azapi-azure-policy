@@ -69,11 +69,20 @@ variable "pol_parameters" {
   type        = map(any)
 }
 
+variable "pol_policy_definition_id" {
+  description = "The policy definition id being assigned; these can be found within Azure Policy definitions."
+  type        = string
+  validation {
+    condition     = can(regex("^/providers/Microsoft.Authorization/policyDefinitions/[0-9a-fA-F-]+$", var.pol_policy_definition_id))
+    error_message = "The policy definition Id must be valid."
+  }
+}
+
 variable "pol_scope" {
   description = "The scope of the policy assignment i.e. the management group, subscription or resource group resource id."
   type        = string
   validation {
-    condition     = can(regex("^/providers/Microsoft.Management/managementGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*$") || regex("^/subscriptions/[0-9a-fA-F-]+$") || regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*[^.]$", var.pol_scope))
+    condition     = can(regex("^/providers/Microsoft.Management/managementGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*$|^/subscriptions/[0-9a-fA-F-]+$|^/subscriptions/[0-9a-fA-F-]/resourceGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*[^.]$", var.pol_scope))
     error_message = "The resource id must be a management group, subscription, or resource group resource id."
   }
 }

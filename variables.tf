@@ -60,7 +60,7 @@ variable "enforce" {
 variable "identity" {
   description = "An identity object"
   default = {
-      type = "None"
+    type = "None"
   }
   type = object({
     type = string
@@ -72,7 +72,7 @@ variable "location" {
   default     = "uksouth"
   type        = string
   validation {
-    condition = can(regex("^[a-z]+(?:[23])?$", var.location))
+    condition     = can(regex("^[a-z]+(?:[23])?$", var.location))
     error_message = "The location must be a lowercase and constructed using letters a-z; can have an optional number appended too."
   }
 }
@@ -133,6 +133,10 @@ variable "parameters" {
 variable "policy_definition_id" {
   description = "The policy definition id being assigned; these can be found within Azure Policy definitions."
   type        = string
+  validation {
+    condition     = can(regex("^/providers/Microsoft.Authorization/policyDefinitions/[0-9a-fA-F-]+$", var.policy_definition_id))
+    error_message = "The policy definition Id must be valid."
+  }
 }
 
 variable "resource_selectors" {
@@ -156,7 +160,7 @@ variable "scope" {
   description = "The scope of the policy assignment i.e. the management group, subscription or resource group resource id."
   type        = string
   validation {
-    condition     = can(regex("^/providers/Microsoft.Management/managementGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*$") || regex("^/subscriptions/[0-9a-fA-F-]+$") || regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*[^.]$"), var.scope)
+    condition     = can(regex("^/providers/Microsoft.Management/managementGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*$|^/subscriptions/[0-9a-fA-F-]+$|^/subscriptions/[0-9a-fA-F-]/resourceGroups/[a-zA-Z0-9][a-zA-Z0-9._()\\-]*[^.]$", var.scope))
     error_message = "The resource id must be a management group, subscription, or resource group resource id."
   }
 }

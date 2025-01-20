@@ -1,3 +1,3 @@
-output "azpol" {
+output "policy" {
   value = module.azpol
 }

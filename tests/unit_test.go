@@ -7,14 +7,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// func TestItErrorsWhenNameIsEmpty(t *testing.T) {
+func TestItErrorsWhenPolicyNameIsEmpty(t *testing.T) {
+	t.Parallel()
 
-// }
-
-func TestItErrorsWhenLocationIsEmpty(t *testing.T) {
-	//t.Parallel()
-
-	opts := DefaultOptions().Without("location")
+	opts := DefaultOptions().Without("pol_name")
 
 	terraformOptions := Setup(t, "examples/tagging", opts)
 
@@ -22,8 +18,19 @@ func TestItErrorsWhenLocationIsEmpty(t *testing.T) {
 	require.NotNil(t, err)
 }
 
-func TestItErrorsWhenNameIsEmpty(t *testing.T) {
-	//t.Parallel()
+func TestItErrorsWhenNonComplianceMessagesIsEmpty(t *testing.T) {
+	t.Parallel()
+
+	opts := DefaultOptions().Without("pol_non_compliance_messages")
+
+	terraformOptions := Setup(t, "examples/tagging", opts)
+
+	_, err := terraform.InitAndPlanE(t, terraformOptions)
+	require.NotNil(t, err)
+}
+
+func TestItErrorsWhenPolicyDefinitionIdIsEmpty(t *testing.T) {
+	t.Parallel()
 
 	opts := DefaultOptions().Without("name")
 
@@ -34,7 +41,7 @@ func TestItErrorsWhenNameIsEmpty(t *testing.T) {
 }
 
 func TestItApplies(t *testing.T) {
-	//t.Parallel()
+	t.Parallel()
 
 	opts := GetTestConfig(t)
 
@@ -43,19 +50,14 @@ func TestItApplies(t *testing.T) {
 	defer terraform.Destroy(t, terraformOptions)
 	_, err := terraform.InitAndApplyE(t, terraformOptions)
 
-	resource_group := map[string]any{}
-	terraform.OutputStruct(t, terraformOptions, "resource_group", &resource_group)
+	policy := map[string]any{}
+	terraform.OutputStruct(t, terraformOptions, "policy", &policy)
 
-	t.Log(resource_group["resource_group"].(map[string]any)["id"])
-	t.Log(resource_group["resource_group"].(map[string]any)["name"])
-	t.Log(resource_group["resource_group"].(map[string]any)["location"])
-	t.Log(resource_group["resource_group"].(map[string]any)["tags"])
-	t.Log(opts["name"])
-	t.Log(opts["location"])
-	t.Log(opts["tags"])
+	t.Log(policy["policy"].(map[string]any)["id"])
+	t.Log(opts["pol_non_compliance_messages"])
 
 	require.Nil(t, err)
-	require.Equal(t, opts["name"], resource_group["resource_group"].(map[string]any)["name"])
-	require.Equal(t, opts["location"], resource_group["resource_group"].(map[string]any)["location"])
-	require.Equal(t, opts["tags"], resource_group["resource_group"].(map[string]any)["tags"])
+	require.Equal(t, opts["pol_scope"], policy["policy"].(map[string]any)["parent_id"])
+	require.Equal(t, opts["pol_name"], policy["policy"].(map[string]any)["name"])
+	//require.Equal(t, opts[""], resource_group["resource_group"].(map[string]any)["tags"])
 }

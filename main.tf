@@ -1,5 +1,5 @@
 resource "azapi_resource" "policy_assignment" {
-  type      = "Microsoft.Authorization/policyAssignments@2025-01-01"
+  type      = "Microsoft.Authorization/policyAssignments@2024-04-01"
   name      = var.name
   parent_id = var.scope
   identity {

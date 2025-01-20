@@ -23,7 +23,7 @@ func DefaultOptions() Options {
 		"pol_non_compliance_messages": []interface{}{
 			map[string]interface{}{
 				"message": "message",
-				"policyDefinitionReferenceId": "id",
+				"policyDefinitionReferenceId": "/providers/Microsoft.Authorization/policyDefinitions/00000000-0000-0000-0000-000000000000",
 			},
 		},
 		"pol_parameters": map[string]map[string]interface{}{
@@ -31,7 +31,8 @@ func DefaultOptions() Options {
 				"key": "value",
 			},			
 		},
-		"pol_scope": "resource_id", 
+		"pol_policy_definition_id": "/providers/Microsoft.Authorization/policyDefinitions/00000000-0000-0000-0000-000000000000",
+		"pol_scope": "/subscriptions/00000000-0000-0000-0000-000000000000", 
 	}
 }
 
@@ -76,7 +77,6 @@ func GetTestConfig(t *testing.T) Options {
 		"pol_non_compliance_messages": []interface{}{
 			map[string]interface{}{
 				"message": "The Resource Group must have a Project Tag!",
-				"policyDefinitionReferenceId": "/providers/Microsoft.Authorization/policyDefinitions/d8cf8476-a2ec-4916-896e-992351803c44",
 			},
 		},
 		"pol_parameters": map[string]interface{}{
@@ -84,6 +84,7 @@ func GetTestConfig(t *testing.T) Options {
 				"value": "Project",
 			  },
 		},
-		"pol_scope": os.Getenv("ARM_SUBSCRIPTION_ID"),
+		"pol_policy_definition_id": "/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025",
+		"pol_scope": fmt.Sprintf("/subscriptions/%s", os.Getenv("ARM_SUBSCRIPTION_ID")),
 	}
 }

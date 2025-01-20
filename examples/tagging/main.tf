@@ -7,13 +7,9 @@ module "azpol" {
   location                = var.location
   name                    = var.pol_name
   non_compliance_messages = var.pol_non_compliance_messages
-  parameters = {
-    tagName = {
-      value = "Project"
-    }
-  }
-  policy_definition_id = data.azurerm_policy_definition.require_a_tag_on_resource_groups.id
-  scope                = var.pol_scope
+  parameters              = var.pol_parameters
+  policy_definition_id    = var.pol_policy_definition_id
+  scope                   = var.pol_scope
 }
 
 
@@ -27,7 +23,7 @@ module "rg" {
   tags     = var.tags
 
   depends_on = [
-    data.azurerm_policy_definition.require_a_tag_on_resource_groups
+    module.azpol
   ]
 }
 
