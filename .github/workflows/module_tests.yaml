@@ -113,7 +113,7 @@ jobs:
         CURRENT_VERSION=${{ vars.PROVIDER_VERSION }}
 
         # Set the current version
-        sed -i "5aversion = \"${CURRENT_VERSION}\"" ../examples/tagging/versions.tf
+        sed -i "8aversion = \"${CURRENT_VERSION}\"" ../examples/tagging/versions.tf
         # format the terraform...
         terraform fmt ../examples/tagging
 
@@ -124,8 +124,8 @@ jobs:
         go test -v -run TestItApplies_Regression_Part_1 ./... 2>&1 | go-junit-report -set-exit-code > r1_report.xml
 
         # Update the provider version...
-        sed -i '6d' ../examples/tagging/versions.tf
-        sed -i "5aversion = \"${{ steps.pull_and_parse.outputs.NEW_PROVIDER_VERSION }}\"" ../examples/tagging/versions.tf
+        sed -i '9d' ../examples/tagging/versions.tf
+        sed -i "8aversion = \"${{ steps.pull_and_parse.outputs.NEW_PROVIDER_VERSION }}\"" ../examples/tagging/versions.tf
         # format the terraform...
         terraform fmt ../examples/tagging
 
