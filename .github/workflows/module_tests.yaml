@@ -30,6 +30,7 @@ jobs:
       uses: dependabot/fetch-metadata@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+      if: github.event.pull_request.user.login == 'dependabot[bot]'
 
     # As the dependabot task above doesn't show the version info. I've mashed together the step below to pull the latest version and update
     # the github actions variable NEW_PROVIDER_VERSION with that value.
