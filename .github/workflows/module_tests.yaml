@@ -39,7 +39,7 @@ jobs:
       run: |
 
         # There might be an issue here if subsequent tests run and pull a newer provider version...
-        curl -sL https://raw.githubusercontent.com/hashicorp/terraform-provider-azurerm/main/CHANGELOG.md -o changelog.md
+        curl -sL https://raw.githubusercontent.com/Azure/terraform-provider-azapi/refs/heads/main/CHANGELOG.md -o changelog.md
         NEW_VERSION=$(sed -n '1s/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' changelog.md)
 
         echo "NEW_PROVIDER_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
