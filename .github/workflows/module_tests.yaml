@@ -11,3 +11,186 @@ permissions:
   pull-requests: write
   issues: write
   repository-projects: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Run Terratest
+    
+    defaults:
+      run:
+        working-directory: ./tests
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Fetch Dependabot Info
+      id: dependabot_info
+      uses: dependabot/fetch-metadata@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    # As the dependabot task above doesn't show the version info. I've mashed together the step below to pull the latest version and update
+    # the github actions variable NEW_PROVIDER_VERSION with that value.
+    - name: Pull AzureRm changelog and Parse
+      id: pull_and_parse
+      run: |
+
+        # There might be an issue here if subsequent tests run and pull a newer provider version...
+        curl -sL https://raw.githubusercontent.com/hashicorp/terraform-provider-azurerm/main/CHANGELOG.md -o changelog.md
+        NEW_VERSION=$(sed -n '1s/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' changelog.md)
+
+        echo "NEW_PROVIDER_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Authenticate with Azure
+      id: auth
+      uses: azure/login@v2
+      with:
+        creds: '{"clientId": "${{ secrets.ARM_CLIENT_ID }}", "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}", "tenantId": "${{ secrets.ARM_TENANT_ID }}", "subscriptionId": "${{ vars.ARM_SUBSCRIPTION_ID }}"}'
+    
+    - name: install terraform
+      id: tf_install
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ vars.TERRAFORM_VERSION }}
+      if: steps.auth.outcome == 'success'
+
+    - name: Run Validation Tests
+      id: validation_tests
+      run: |
+
+        # Setup Go environment
+        GOPATH="$HOME/go"
+        export GOPATH
+
+        PATH=$PATH:$GOPATH/bin
+        export PATH
+
+        # Install go junit reporting package
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        
+        # export variables as environment variables
+        export ARM_CLIENT_OBJECT_ID=${{ secrets.ARM_CLIENT_OBJECT_ID }}
+        export ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}
+        export ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}
+        export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
+        export ARM_SUBSCRIPTION_ID=${{ vars.ARM_SUBSCRIPTION_ID }}
+        export ARM_USE_AZUREAD=true
+
+        # Run Go tests
+        go test -v general_validation_test.go common.go 2>&1 | go-junit-report -set-exit-code > v_report.xml
+      if: steps.tf_install.outcome == 'success'
+    
+    - name: Run Unit Tests
+      id: unit_tests
+      run: |
+
+        # Setup Go environment
+        GOPATH="$HOME/go"
+        export GOPATH
+
+        PATH=$PATH:$GOPATH/bin
+        export PATH
+
+        # Install go junit reporting package
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        
+        # export variables as environment variables
+        export ARM_CLIENT_OBJECT_ID=${{ secrets.ARM_CLIENT_OBJECT_ID }}
+        export ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}
+        export ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}
+        export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
+        export ARM_SUBSCRIPTION_ID=${{ vars.ARM_SUBSCRIPTION_ID }}
+        export ARM_USE_AZUREAD=true
+
+        # Run Go tests
+        go test -v unit_test.go common.go 2>&1 | go-junit-report -set-exit-code > u_report.xml
+      if: steps.tf_install.outcome == 'success'
+
+    - name: Run Regression Test
+      id: regression_tests
+      run: | 
+
+        # Setup Go environment
+        GOPATH="$HOME/go"
+        export GOPATH
+
+        PATH=$PATH:$GOPATH/bin
+        export PATH
+
+        # Install go junit reporting package
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        
+        # export variables as environment variables
+        export ARM_CLIENT_OBJECT_ID=${{ secrets.ARM_CLIENT_OBJECT_ID }}
+        export ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}
+        export ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}
+        export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
+        export ARM_SUBSCRIPTION_ID=${{ vars.ARM_SUBSCRIPTION_ID }}
+        export ARM_USE_AZUREAD=true
+
+        # Grab the current version
+        CURRENT_VERSION=${{ vars.PROVIDER_VERSION }}
+
+        # Set the current version
+        sed -i "8aversion = \"${CURRENT_VERSION}\"" ../examples/tagging/versions.tf
+        # format the terraform...
+        terraform fmt ../examples/tagging
+
+        # Output versions.tf...
+        cat ../examples/tagging/versions.tf 
+
+        # Run the go test without destroy...
+        go test -v -run TestItApplies_Regression_Part_1 ./... 2>&1 | go-junit-report -set-exit-code > r1_report.xml
+
+        # Update the provider version...
+        sed -i '9d' ../examples/tagging/versions.tf
+        sed -i "8aversion = \"${{ steps.pull_and_parse.outputs.NEW_PROVIDER_VERSION }}\"" ../examples/tagging/versions.tf
+        # format the terraform...
+        terraform fmt ../examples/tagging
+
+        # Output versions.tf...
+        cat ../examples/tagging/versions.tf 
+
+        # Run the go test with destroy...
+        go test -v -run TestItApplies_Regression_Part_2 ./... 2>&1 | go-junit-report -set-exit-code > r2_report.xml
+
+        # Update version 
+        # grab the latest version....
+        # Update provider version to be the latest version....
+      if: steps.tf_install.outcome == 'success'
+
+    - name: Upload validation test summary
+      uses: test-summary/action@v2
+      with:
+        paths: tests/*.xml
+      if: always()
+    
+    - name: Add Comment to PR
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `### Next Steps...
+          <details>
+          Update the readme with details of any changes the new version introduces...and then create a new release once the PR is merged.
+          </details>
+
+          Pusher: @${{ github.actor }}
+          Action: ${{ github.event_name }}
+          Workflow: ${{ github.workflow }}`;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
+      if: steps.regression_tests.outcome == 'success'
+
+
+
+
+
+      

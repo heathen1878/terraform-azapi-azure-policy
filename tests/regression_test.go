@@ -12,7 +12,7 @@ func TestItApplies_Regression_Part_1(t *testing.T) {
 	
 	opts := GetTestConfig(t)
 
-	terraformOptions := Setup(t, "examples/rg", opts)
+	terraformOptions := Setup(t, "examples/tagging", opts)
 
 	_, err := terraform.InitAndApplyE(t, terraformOptions)
 	require.Nil(t, err)
@@ -22,7 +22,7 @@ func TestItApplies_Regression_Part_2(t *testing.T) {
 	
 	opts := GetTestConfig(t)
 
-	terraformOptions := Setup(t, "examples/rg", opts)
+	terraformOptions := Setup(t, "examples/tagging", opts)
 
 	defer terraform.Destroy(t, terraformOptions)
 	applyOutput, err := terraform.InitAndApplyE(t, terraformOptions)
