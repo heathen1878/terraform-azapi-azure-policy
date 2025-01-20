@@ -1,0 +1,12 @@
+  display_name            = "A policy display name"
+  name                    = "A policy name"
+  non_compliance_messages = {
+    message = "A non compliance message"
+  }
+  parameters              = {
+    param = {
+        value = "some value"
+    }
+  }
+  policy_definition_id    = "The policy definition this assignment uses as a resource id"
+  scope                   = "The resource id of a management group, subscription or resource group."
