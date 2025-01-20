@@ -41,7 +41,6 @@ func TestItErrorsWhenPolicyDefinitionIdIsEmpty(t *testing.T) {
 }
 
 func TestItApplies(t *testing.T) {
-	t.Parallel()
 
 	opts := GetTestConfig(t)
 
