@@ -1,39 +1,33 @@
-locals {
-    location = "uksouth"
+module "azpol" {
+
+  source = "../.."
+
+  description             = var.pol_description
+  display_name            = var.pol_display_name
+  location                = var.location
+  name                    = var.pol_name
+  non_compliance_messages = var.pol_non_compliance_messages
+  parameters = {
+    tagName = {
+      value = "Project"
+    }
+  }
+  policy_definition_id = data.azurerm_policy_definition.require_a_tag_on_resource_groups.id
+  scope                = var.pol_scope
 }
+
 
 module "rg" {
 
   source  = "heathen1878/resource-groups/azurerm"
   version = "4.0.0"
 
-  name = "rg-azure-policy-example"
-  location = local.location
-  tags = {
+  name     = var.rg_name
+  location = var.location
+  tags     = var.tags
 
-  }
+  depends_on = [
+    data.azurerm_policy_definition.require_a_tag_on_resource_groups
+  ]
 }
 
-module "azpol" {
-
-    source = "../.."
-
-    description = "Enforces the requirement for a tag name of project on each resource group"
-    display_name = "Require Project Tag on Resource Groups"
-    identity = {}
-    location = local.location
-    name = "Check for project tag on resource groups"
-    non_compliance_messages = [
-        {
-            message = "The Resource Group must have a Project Tag!"
-            policyDefinitionReferenceId = data.azurerm_policy_definition.require_a_tag_on_resource_groups.id
-        }
-    ]
-    parameters = {
-      tagName = {
-        value = "Project"
-      }
-    }
-    policy_definition_id = data.azurerm_policy_definition.require_a_tag_on_resource_groups.id
-    scope = module.rg.resource_group.id
-}

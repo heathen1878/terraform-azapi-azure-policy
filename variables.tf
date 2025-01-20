@@ -36,7 +36,7 @@ variable "display_name" {
   default     = null
   type        = string
   validation {
-    condition     = var.description == null || length(var.description) > 0
+    condition     = var.description == null || length(var.display_name) > 0
     error_message = "If you're providing a value, it must not be an empty string"
   }
 }
@@ -59,11 +59,9 @@ variable "enforce" {
 
 variable "identity" {
   description = "An identity object"
-  default = object(
-    {
+  default = {
       type = "None"
-    }
-  )
+  }
   type = object({
     type = string
   })
@@ -74,7 +72,7 @@ variable "location" {
   default     = "uksouth"
   type        = string
   validation {
-    condition = can(regex("^[a-z]+(?:[23])?$"), var.location)
+    condition = can(regex("^[a-z]+(?:[23])?$", var.location))
     error_message = "The location must be a lowercase and constructed using letters a-z; can have an optional number appended too."
   }
 }
@@ -111,7 +109,7 @@ variable "not_scopes" {
 variable "overrides" {
   description = "A list of policy overrides"
   default     = []
-  type = list(optional(object(
+  type = list(object(
     {
       kind = string
       selectors = optional(list(object(
@@ -123,7 +121,7 @@ variable "overrides" {
       )), [])
       value = optional(string)
     }
-  )), [])
+  ))
 }
 
 variable "parameters" {
