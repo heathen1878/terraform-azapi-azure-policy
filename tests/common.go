@@ -17,6 +17,7 @@ func DefaultOptions() Options {
 		"tags": map[string]interface{}{
   			"key": "value",
 		},
+		"pol_definition_version": "1.*.*",
 		"pol_description": "description",
 		"pol_display_name": "display_name",
 		"pol_name": "name",
@@ -72,6 +73,7 @@ func GetTestConfig(t *testing.T) Options {
   			"Terratest": "True",
 			"Project": "Terratest",
 		},
+		"pol_definition_version": "1.*.*",
 		"pol_description": "Enforces the requirement for a tag name of project on each resource group",
 		"pol_display_name": "Require Project Tag on Resource Groups",
 		"pol_name": "Check for project tag on resource groups",

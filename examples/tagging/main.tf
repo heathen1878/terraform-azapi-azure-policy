@@ -2,6 +2,7 @@ module "azpol" {
 
   source = "../.."
 
+  definition_version      = var.pol_definition_version
   description             = var.pol_description
   display_name            = var.pol_display_name
   location                = var.location

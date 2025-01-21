@@ -26,6 +26,12 @@ variable "tags" {
   }
 }
 
+variable "pol_definition_version" {
+  description = "The version of this definition policy to use"
+  default     = null
+  type        = string
+}
+
 variable "pol_description" {
   description = "The Azure Policy description"
   default     = null
