@@ -17,7 +17,6 @@ variable "assignment_type" {
 
 variable "definition_version" {
   description = "The version of this definition policy to use"
-  default     = null
   type        = string
 }
 

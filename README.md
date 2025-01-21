@@ -20,7 +20,7 @@ module "AzPol" {
     source ="heathen1878/azure-policy/azapi"
     version = "1.0.0"
 
-    # Four mandatory parameters
+    # Five mandatory parameters
 
 }
 
@@ -28,4 +28,6 @@ module "AzPol" {
 
 ## Version 1.0.0
 
-- 
+- Supports AzApi 1.14.0 up to AzApi 2.2.0
+- Supports Terraform core executable 1.*
+- Creates Azure Policies assignments; tends to be nested within other modules
