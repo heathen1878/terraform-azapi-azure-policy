@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "terraform"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      time: "12:00"
+      timezone: "Europe/London"
+
+  - package-ecosystem: "gomod"
+    directory: "/tests"
+    schedule:
+      interval: "monthly"
+      time: "12:00"
+      timezone: "Europe/London"
