@@ -15,6 +15,7 @@
 ## Usage
 
 ```go
+# Typically nested within another module to manage Azure Policy Assignments
 module "AzPol" {
 
     source ="heathen1878/azure-policy/azapi"
