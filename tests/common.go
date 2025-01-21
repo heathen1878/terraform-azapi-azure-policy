@@ -57,6 +57,7 @@ func Setup(t *testing.T, e string, opts Options) *terraform.Options {
 		BackendConfig: map[string]interface{}{
 			"path": "test.tfstate",
 		},
+		NoColor: true,
 		Upgrade: true,
 	}
 }
